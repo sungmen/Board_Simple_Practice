@@ -6,3 +6,26 @@ body{
      * https://fonts.google.com/specimen/Open+Sans?query=open+s&sidebar.open&selection.family=Open+Sans:wght@300
      */
 }
+.breadcrumb-item {
+    font-size: 0.8em !important;
+}
+.ellipsis {
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.board-table {
+    table-layout: fixed;
+}
+.board-table .date {
+    width: 100px;
+}
+
+.post-body {
+    white-space: pre-line;
+}
+.post-info {
+    font-size: 0.8em;
+}
