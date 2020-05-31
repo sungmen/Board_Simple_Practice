@@ -21,7 +21,7 @@
                         <td clspan=2> There is no data to show </td>
                     </tr>
                 <% } %> 
-                <% posts.forEach(function(post) { %> 
+                <% posts.forEach((post) => { %> 
                     <tr>
                         <td>
                             <a href="/posts/<%= post._id %>"><div class="ellipsis"><%= post.title  %> </div></a>

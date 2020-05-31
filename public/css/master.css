@@ -22,10 +22,12 @@ body{
 .board-table .date {
     width: 100px;
 }
-
 .post-body {
     white-space: pre-line;
 }
 .post-info {
     font-size: 0.8em;
+}
+.user-form {
+    width: 400px;
 }
