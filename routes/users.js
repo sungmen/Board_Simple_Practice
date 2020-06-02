@@ -16,13 +16,19 @@ router.get('/', (req, res) => {
 
 // New
 router.get('/new', (req, res) => {
-  res.render('users/new');
+    let user = req.flash('user')[0] || {};
+    let erros = req.flash('errors')[0] || {};
+    res.render('users/new', {user:user, errors:erors});
 });
 
 // create
 router.post('/', (req, res) => {
   User.create(req.body, (err, user) => {
-    if(err) return res.json(err);
+    if(err) {
+        req.flash('user', req.body);
+        req.flash('errors', parseError(err));
+        return res.redirect('/users/new');
+    }
     res.redirect('/users');
   });
 });
@@ -37,10 +43,17 @@ router.get('/:username', (req, res)=>{
 
 // edit
 router.get('/:username/edit', (req, res) => {
-  User.findOne({username:req.params.username}, (err, user) => {
-    if(err) return res.json(err);
-    res.render('users/edit', {user:user});
-  });
+    let user = req.flash('user')[0];
+    let errors = req.flash('errors')[0] || {};
+    if(!user) {
+        User.findOne({username:req.params.username}, (err, user) => {
+            if(err) return res.json(err);
+            res.render('users/edit', {username:req.params.username, user:user, errors:errors});
+        });
+    }
+    else {
+        res.render('user/edit', {username:req.params.username, user:user, errors:errors});
+    }
 });
 
 // update // 2
@@ -74,3 +87,21 @@ router.delete('/:username', (req, res) => {
 });
 
 module.exports = router;
+
+// functions
+const parseError = (errors) => {
+    let parsed = {};
+    if (errors.name == 'ValidationError') {
+        for (let name in errors.errors) {
+            let validationError = errors.errors[name];
+            parsed[name] = {message:validationError.message};
+        }
+    }
+    else if (errors.code == '11000' && errors.errmsg.indexOf('username') > 0) {
+        parsed.username = {message:'This username already exists!'};
+    }
+    else {
+        parsed.unhandled = JSON.stringify(errors);
+    }
+    return parsed;
+}
