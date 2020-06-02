@@ -1,6 +1,7 @@
 // models/User.js
 
 const mongoose = require('mongoose');
+const bcrypt = require('bbcryptjs')
 
 // schema
 let userSchema = mongoose.Schema({
@@ -31,33 +32,51 @@ userSchema.virtual('newPassword')
 
 // password validation
 userSchema.path('password').validate(function(v) {
-    let user = this;
+  let user = this;
   
-    // create user
-    if(user.isNew){ 
-      if(!user.passwordConfirmation){
-        user.invalidate('passwordConfirmation', 'Password Confirmation is required.');
-      }
-  
-      if(user.password !== user.passwordConfirmation) {
-        user.invalidate('passwordConfirmation', 'Password Confirmation does not matched!');
-      }
+  // create user
+  if(user.isNew){ 
+    if(!user.passwordConfirmation){
+      user.invalidate('passwordConfirmation', 'Password Confirmation is required.');
     }
   
-    // update user
-    if(!user.isNew){
-      if(!user.currentPassword){
-        user.invalidate('currentPassword', 'Current Password is required!');
-      }
-      else if(user.currentPassword != user.originalPassword){
-        user.invalidate('currentPassword', 'Current Password is invalid!');
-      }
-  
-      if(user.newPassword !== user.passwordConfirmation) {
-        user.invalidate('passwordConfirmation', 'Password Confirmation does not matched!');
-      }
+    if(user.password !== user.passwordConfirmation) {
+      user.invalidate('passwordConfirmation', 'Password Confirmation does not matched!');
     }
-  });
+  }
+  
+  // update user
+  if(!user.isNew){
+    if(!user.currentPassword){
+      user.invalidate('currentPassword', 'Current Password is required!');
+    }
+    else if(!bcrypt.compareSync(user.currentPassword, user.originalPassword)){
+      user.invalidate('currentPassword', 'Current Password is invalid!');
+    }
+  
+    if(user.newPassword !== user.passwordConfirmation) {
+      user.invalidate('passwordConfirmation', 'Password Confirmation does not matched!');
+    }
+  }
+});
+
+// hash password
+userSchema.pre('save', (next) =>  {
+  let user = this;
+  if (!user.isModified('password')) {
+    return next();
+  } else {
+    user.password = bcrypt.hashSync(user.password);
+    return next();
+  }
+});
+
+// model methods
+userSchema.methods.authenticate = (password) => {
+  let user = this;
+  return bcrypt.compareSync(password, user.password)
+};
+
 
 // model & export
 let User = mongoose.model('user', userSchema);
