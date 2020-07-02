@@ -16,18 +16,18 @@ router.get('/', (req, res) => {
 
 // New
 router.get('/new', (req, res) => {
-    let user = req.flash('user')[0] || {};
-    let erros = req.flash('errors')[0] || {};
-    res.render('users/new', {user:user, errors:erors});
+  let user = req.flash('user')[0] || {};
+  let errors = req.flash('errors')[0] || {};
+  res.render('users/new', { user:user, errors:errors });
 });
 
 // create
 router.post('/', (req, res) => {
   User.create(req.body, (err, user) => {
-    if(err) {
-        req.flash('user', req.body);
-        req.flash('errors', parseError(err));
-        return res.redirect('/users/new');
+    if(err){
+      req.flash('user', req.body);
+      req.flash('errors', parseError(err));
+      return res.redirect('/users/new');
     }
     res.redirect('/users');
   });
@@ -89,19 +89,19 @@ router.delete('/:username', (req, res) => {
 module.exports = router;
 
 // functions
-const parseError = (errors) => {
-    let parsed = {};
-    if (errors.name == 'ValidationError') {
-        for (let name in errors.errors) {
-            let validationError = errors.errors[name];
-            parsed[name] = {message:validationError.message};
-        }
+let parseError = (errors) => {
+  let parsed = {};
+  if(errors.name == 'ValidationError'){
+    for(let name in errors.errors){
+      let validationError = errors.errors[name];
+      parsed[name] = { message:validationError.message };
     }
-    else if (errors.code == '11000' && errors.errmsg.indexOf('username') > 0) {
-        parsed.username = {message:'This username already exists!'};
-    }
-    else {
-        parsed.unhandled = JSON.stringify(errors);
-    }
-    return parsed;
+  }
+  else if(errors.code == '11000' && errors.errmsg.indexOf('username') > 0) {
+    parsed.username = { message:'This username already exists!' };
+  }
+  else {
+    parsed.unhandled = JSON.stringify(errors);
+  }
+  return parsed;
 }
